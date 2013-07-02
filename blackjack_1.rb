@@ -98,7 +98,7 @@
 
   def dealer_above_17?
     hand_value(@dealer_hand).each do |number|
-      return true if number > 17
+      return true if number >= 17
     end
     false
   end
@@ -151,7 +151,7 @@
     puts "1.....Hit (get another card)"
     puts "2.....Review Hand (look at your cards and your hand value)"
     puts "3.....Dealer Card (look at the dealer's visible card)"
-    puts "4.....Hold (Keep your cards and see how they stack up against the dealer)"
+    puts "4.....Stay (Keep your cards and see how they stack up against the dealer)"
     @action = gets.chomp
   end
 
