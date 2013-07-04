@@ -5,6 +5,7 @@
     @card_types = ["Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Jack", "Queen", "King"]
     @card_suits = ["Clubs", "Diamonds", "Spades", "Hearts"]
     @card_values = {two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9, ten:10, jack:10, queen:10, king:10}
+    @deck = @card_types.product(@card_suits).shuffle!
     @name = ""
     @dealer = @dealer_options[rand(4)]
     @player_hand = []
@@ -15,25 +16,17 @@
   #end
 
   def deal_cards
-    until @player_hand.count == 2
-      if @dealt_cards.include?("#{@card_types[rand(13)]} of #{@card_suits[rand(4)]}") == false
-        @dealt_cards << "#{@card_types[rand(13)]} of #{@card_suits[rand(4)]}"
-        @player_hand << @dealt_cards.last
-      end
-    end
-    until @dealer_hand.count == 2
-      if @dealt_cards.include?("#{@card_types[rand(13)]} of #{@card_suits[rand(4)]}") == false
-        @dealt_cards << "#{@card_types[rand(13)]} of #{@card_suits[rand(4)]}"
-        @dealer_hand << @dealt_cards.last
-      end
+    2.times do
+      @player_hand << @deck.pop.join(" of ")
+      @dealer_hand << @deck.pop.join(" of ")
     end
     puts "You were dealt a #{@player_hand[0]} and a #{@player_hand[1]}."
     puts
     puts "The dealer's visible card is a #{@dealer_hand[0]}."
   end
 
-  def ace_check?
-    @player_hand.each do |string|
+  def ace_check?(hand)
+    hand.each do |string|
       return true if string.split[0] == "Ace"
     end
     false
@@ -44,56 +37,53 @@
     false
   end
 
+  def ace_value(hand, one_or_eleven)
+    value = 0
+    hand.each do |string|
+        if string.split[0] == "Ace"
+          value += one_or_eleven
+        else
+          value += @card_values[string.split[0].downcase.to_sym]
+        end
+    end
+    @value_arr << value
+  end
+
   def hand_value(hand)
     value = 0
-    value_arr = []
-    if ace_check? == false
+    @value_arr = []
+    if ace_check?(hand) == false
       hand.each do |string|
-        value = value + @card_values[string.split[0].downcase.to_sym]
+        value += @card_values[string.split[0].downcase.to_sym]
       end
-      value_arr << value
+      @value_arr << value
     else
-      hand.each do |string|
-        if string.split[0] == "Ace"
-          value = value + 1
-        else
-          value = value + @card_values[string.split[0].downcase.to_sym]
-        end
-      end
-      value_arr << value
-      value = 0
-      hand.each do |string|
-        if string.split[0] == "Ace"
-          value = value + 11
-        else
-          value = value + @card_values[string.split[0].downcase.to_sym]
-        end
-      end
-      value_arr << value    
+      ace_value(hand, 1)
+      ace_value(hand, 11)    
     end
-    value_arr
+    @value_arr
   end
 
   def hit(hand)
-    one_more_card = hand.count + 1
-    until hand.count == one_more_card
-      if @dealt_cards.include?("#{@card_types[rand(13)]} of #{@card_suits[rand(4)]}") == false
-        @dealt_cards << "#{@card_types[rand(13)]} of #{@card_suits[rand(4)]}"
-        hand << @dealt_cards.last
-      end
-    end
+    hand << @deck.pop.join(" of ")
+    puts
     puts "#{hand.last}"
+    puts
   end
 
   def review_player_hand
+    puts
     puts "You currently have the following cards in your hand:"
     puts "#{@player_hand.join(", ")}"
     puts
     puts "Your hand value(s) is(are): #{hand_value(@player_hand).join(", ")}"
+    puts
   end
 
   def dealer_card
-    puts "#{@dealer_hand[0]}"
+    puts
+    puts "The dealer's visible card is: #{@dealer_hand[0]}"
+    puts
   end
 
   def dealer_above_17?
@@ -122,6 +112,7 @@
       hit(@dealer_hand)
     end
     if bust_check?(hand_value(@dealer_hand))
+      puts
       puts "Dealer busts, you win!!!"
       puts "The dealers cards were: #{@dealer_hand.join(", ")}"
       puts
@@ -130,12 +121,14 @@
       exit
     else
       if dealer_final_score > player_final_score
+        puts
         puts "The house wins!"
         puts "#{@dealer} scored #{dealer_final_score}, #{@name} scored #{player_final_score}"
         puts "The dealers cards were: #{@dealer_hand.join(", ")}"
         puts
         exit
       else
+        puts
         puts "You win!"
         puts "#{@dealer} scored #{dealer_final_score}, #{@name} scored #{player_final_score}"
         puts "The dealers cards were: #{@dealer_hand.join(", ")}"
@@ -161,6 +154,7 @@
     hit(@player_hand) if @action == "1"
     if bust_check?(hand_value(@player_hand))
       puts "Oh no, you bust! Dealer wins."
+      puts
       exit
     end
     review_player_hand if @action == "2"
@@ -186,6 +180,8 @@ while true
   if method_check.include?(@action)
     method_dispatch
   else
+    puts
     puts "Please choose a valid option"
+    puts
   end
 end
