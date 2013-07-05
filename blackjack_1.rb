@@ -37,7 +37,7 @@
     false
   end
 
-  def ace_value(hand, one_or_eleven)
+ def ace_value(hand, one_or_eleven)
     value = 0
     hand.each do |string|
         if string.split[0] == "Ace"
