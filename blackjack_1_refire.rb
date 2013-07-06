@@ -18,6 +18,7 @@ def deal
     end_game if blackjack?(@player_hand, @player_points)
     puts
     puts "The dealer's visible card is a #{@dealer_hand[0]}."
+    puts
     end_game if blackjack?(@dealer_hand, @dealer_points)
 end
 
@@ -31,8 +32,8 @@ def hit(hand, hand_points)
   puts "The #{hand.last} was dealt."
   end_game if busted?(hand_points)
   report_total(hand_points) if hand_points != @dealer_points
-  options(hand, hand_points) if hand != @dealer_hand
   puts
+  options(hand, hand_points) if hand != @dealer_hand
 end
 
 def stay
@@ -67,7 +68,7 @@ def points(hand_points)
 end
 
 def busted?(hand_points)
-  return true if points(hand_points).select { |x| x < 21 } == []
+  return true if points(hand_points).select { |x| x < 22 } == []
   false
 end
 
@@ -77,11 +78,13 @@ def blackjack?(hand, hand_points)
 end
 
 def options(hand, hand_points)
+  actions = ["1", "2"]
   puts "Enter a number to select your choice:"
   puts "1.....Hit (get another card)"
   puts "2.....Stay (keep your cards)"
   action = gets.chomp
   puts
+  options(hand, hand_points) unless actions.include?(action)
   hit(hand, hand_points) if action == "1"
   stay if action == "2"
 end
@@ -126,14 +129,14 @@ def end_game
   elsif busted?(@dealer_points)
     puts
     puts "House busted! The dealer looks sad for having lost."
-    puts "The dealers cards were: #{@dealer_hand.join(", ")}"
+    puts "The dealer's cards were: #{@dealer_hand.join(", ")}"
     puts "You win."
     puts
     begin_game
   elsif blackjack?(@dealer_hand, @dealer_points)
     puts
     puts "House hits Blackjack! The dealer gives you a smug look."
-    puts "The dealers cards were: #{@dealer_hand.join(", ")}"
+    puts "The dealer's cards were: #{@dealer_hand.join(", ")}"
     puts "House wins."
     puts
     begin_game
@@ -141,14 +144,21 @@ def end_game
     puts
     puts "You win! With luck like this you got keep playing!"
     puts "The dealer scored #{final_points(@dealer_points)}, #{@name} scored #{final_points(@player_points)}"
-    puts "The dealers cards were: #{@dealer_hand.join(", ")}"
+    puts "The dealer's cards were: #{@dealer_hand.join(", ")}"
     puts
     begin_game
   elsif final_points(@player_points) < final_points(@dealer_points)
     puts
     puts "House wins! Don't worry, your luck will change. How about another game?"
     puts "The dealer scored #{final_points(@dealer_points)}, #{@name} scored #{final_points(@player_points)}"
-    puts "The dealers cards were: #{@dealer_hand.join(", ")}"
+    puts "The dealer's cards were: #{@dealer_hand.join(", ")}"
+    puts
+    begin_game
+  elsif final_points(@player_points) == final_points(@dealer_points)
+    puts
+    puts "Draw! You can't let it end like this. Play another game!"
+    puts "The dealer scored #{final_points(@dealer_points)}, #{@name} scored #{final_points(@player_points)}"
+    puts "The dealer's cards were: #{@dealer_hand.join(", ")}"
     puts
     begin_game
   end
