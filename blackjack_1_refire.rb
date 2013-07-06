@@ -15,11 +15,11 @@ def deal
     end
     puts "You were dealt a #{@player_hand[0]} and a #{@player_hand[1]}."
     report_total(@player_points)
-    end_game if blackjack?(@player_hand, @player_points)
+    conditions_check(@player_hand, @player_points)
     puts
     puts "The dealer's visible card is a #{@dealer_hand[0]}."
     puts
-    end_game if blackjack?(@dealer_hand, @dealer_points)
+    conditions_check(@dealer_hand, @dealer_points)
 end
 
 def report_total(hand_points)
@@ -30,7 +30,7 @@ def hit(hand, hand_points)
   hand << @deck.pop.join(" of ")
   hand_points << @card_values[hand.last.split[0].downcase.to_sym]
   puts "The #{hand.last} was dealt."
-  end_game if busted?(hand_points)
+  conditions_check(hand, hand_points)
   report_total(hand_points) if hand_points != @dealer_points
   puts
   options(hand, hand_points) if hand != @dealer_hand
@@ -65,6 +65,15 @@ def points(hand_points)
     end
   end
   value.uniq
+end
+
+def conditions_check(hand, hand_points)
+  #busted
+  end_game if points(hand_points).select { |x| x < 22 } == []
+  #blackjack
+  end_game if points(hand_points).include?(21) && hand.count == 2
+  #21 after hitting
+  stay if points(hand_points).include?(21) && hand.count > 2 && hand != @dealer_hand
 end
 
 def busted?(hand_points)
