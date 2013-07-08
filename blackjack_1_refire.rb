@@ -10,8 +10,10 @@ def deal
   2.times do
       @player_hand << @deck.pop.join(" of ")
       @player_points << @card_values[@player_hand.last.split[0].downcase.to_sym]
-      @dealer_hand << @deck.pop.join(" of ")
-      @dealer_points << @card_values[@dealer_hand.last.split[0].downcase.to_sym]
+      if @dealer_hand.count < 2
+        @dealer_hand << @deck.pop.join(" of ")
+        @dealer_points << @card_values[@dealer_hand.last.split[0].downcase.to_sym]
+      end
     end
     puts "You were dealt a #{@player_hand[0]} and a #{@player_hand[1]}."
     report_total(@player_points)
@@ -151,7 +153,7 @@ def end_game
     begin_game
   elsif final_points(@player_points) > final_points(@dealer_points)
     puts
-    puts "You win! With luck like this you got keep playing!"
+    puts "You win! With luck like this you got to keep playing!"
     puts "The dealer scored #{final_points(@dealer_points)}, #{@name} scored #{final_points(@player_points)}"
     puts "The dealer's cards were: #{@dealer_hand.join(", ")}"
     puts
