@@ -8,18 +8,18 @@ end
 
 def deal
   2.times do
-      @player_hand << @deck.pop.join(" of ")
-      @player_points << @card_values[@player_hand.last.split[0].downcase.to_sym]
-      @dealer_hand << @deck.pop.join(" of ")
-      @dealer_points << @card_values[@dealer_hand.last.split[0].downcase.to_sym]
-    end
-    puts "You were dealt a #{@player_hand[0]} and a #{@player_hand[1]}."
-    report_total(@player_points)
-    conditions_check(@player_hand, @player_points)
-    puts
-    puts "The dealer's visible card is a #{@dealer_hand[0]}."
-    puts
-    conditions_check(@dealer_hand, @dealer_points)
+    @player_hand << @deck.pop.join(" of ")
+    @player_points << @card_values[@player_hand.last.split[0].downcase.to_sym]
+    @dealer_hand << @deck.pop.join(" of ")
+    @dealer_points << @card_values[@dealer_hand.last.split[0].downcase.to_sym]
+  end
+  puts "You were dealt a #{@player_hand[0]} and a #{@player_hand[1]}."
+  report_total(@player_points)
+  conditions_check(@player_hand, @player_points)
+  puts
+  puts "The dealer's visible card is a #{@dealer_hand[0]}."
+  puts
+  conditions_check(@dealer_hand, @dealer_points)
 end
 
 def report_total(hand_points)
