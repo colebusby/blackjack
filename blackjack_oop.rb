@@ -1,6 +1,4 @@
-class Blackjack
-  
-  
+class Blackjack  
   
   def initialize    
     player1 = Player.new
