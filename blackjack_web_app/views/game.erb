@@ -1,0 +1,30 @@
+<h1>Blackjack!!!</h1>
+
+<p>Welcome <%= session[:player_name] %>.</p>
+
+Dealer's Hand:
+<ul>
+  <% session[:dealer_hand].each do |card| %>
+    <li><%= card.join(" of ") %></li>
+  <% end %>
+</ul>
+
+<br/>
+
+Player's Hand:
+<ul>
+  <% session[:player_hand].each do |card| %>
+    <li><%= card.join(" of ") %></li>
+  <% end %>
+</ul>
+<p><%= session[:player_name] %>'s cards total: <%= total(session[:player_hand]).join(" or ") %></p>
+
+<% if @bust_or_stay %>
+  <form action="/game/player/hit" method="post">
+    <input type="submit" class="btn" value="Hit">
+  </form>
+
+  <form action="/game/player/stay" method="post">
+    <input type="submit" class="btn" value="Stay">
+  </form>
+<% end %>
