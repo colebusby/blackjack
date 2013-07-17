@@ -3,20 +3,28 @@
 <p>Welcome <%= session[:player_name] %>.</p>
 
 Dealer's Hand:
-<ul>
-  <% session[:dealer_hand].each do |card| %>
-    <li><%= card.join(" of ") %></li>
-  <% end %>
-</ul>
+
+  <%= %Q[<img src="/images/cards/#{session[:dealer_hand][0][1].downcase}_#{CARD_VALUES[session[:dealer_hand][0][0].downcase.to_sym]}.jpg">] %>
+  <%= %Q[<img src="/images/cards/cover.jpg">] %>
+  <!--<ul>
+    <% session[:dealer_hand].each do |card| %>
+      <li><%= card.join(" of ") %></li>
+    <% end %>
+  </ul>-->
+
 
 <br/>
 
 Player's Hand:
-<ul>
+
+<% session[:player_hand].each do |card| %>
+  <%= %Q[<img src="/images/cards/#{card[1].downcase}_#{CARD_VALUES[card[0].downcase.to_sym]}.jpg">] %>
+<% end %>
+<!--<ul>
   <% session[:player_hand].each do |card| %>
     <li><%= card.join(" of ") %></li>
   <% end %>
-</ul>
+</ul>-->
 <p><%= session[:player_name] %>'s cards total: <%= total(session[:player_hand]).join(" or ") %></p>
 
 <% if @bust_or_stay %>
