@@ -27,6 +27,12 @@ helpers do
     value.uniq
   end
 
+  def show_hand(dealer_or_player_hand)
+    dealer_or_player_hand.each do |card|
+      %Q(<img src="/images/cards/#{card[1].downcase}_#{CARD_VALUES[card[0].downcase.to_sym]}.jpg">)
+    end
+  end
+
   def busted?(dealer_or_player_hand)
     total(dealer_or_player_hand).select { |x| x < 22 } == []
   end
@@ -174,6 +180,8 @@ post '/game/dealer/hit' do
   erb :game
 end
 
-post '/game/new_round' do
-  redirect '/game'
+get '/game/new_round' do
+  redirect '/new_player'
+
+  erb :game
 end

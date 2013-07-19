@@ -1,32 +1,32 @@
 <% if @game_over %>  
-  <form action="/game/new_round" method="post">
-    <input type="submit" class="btn" value="Play another round?"
+  <form action="/game/new_round">
+    <input type="submit" class="btn-large" value="Play another round?">
   </form>
 <% end %>
 
 <h1>Blackjack!!!</h1>
 
 <p>Welcome <%= session[:player_name] %>.</p>
+<div class="well">
+<h4>Dealer's Hand:</h4>
 
-Dealer's Hand:
-
-<% if @dealer_turn %>
+<% if @dealer_turn || blackjack?(session[:dealer_hand]) %>
   <% session[:dealer_hand].each do |card| %>
-    <%= %Q[<img src="/images/cards/#{card[1].downcase}_#{CARD_VALUES[card[0].downcase.to_sym]}.jpg">] %>
+    <%= %Q[<img src="/images/cards/#{card[1].downcase}_#{CARD_VALUES[card[0].downcase.to_sym]}.jpg" class="img-polaroid">] %>
   <% end %>
   <p>Dealer's cards total: <%= total(session[:dealer_hand]).join(" or ") %></p>
 <% else %>
-  <%= %Q[<img src="/images/cards/#{session[:dealer_hand][0][1].downcase}_#{CARD_VALUES[session[:dealer_hand][0][0].downcase.to_sym]}.jpg">] %>
-  <%= %Q[<img src="/images/cards/cover.jpg">] %>
+  <%= %Q[<img src="/images/cards/#{session[:dealer_hand][0][1].downcase}_#{CARD_VALUES[session[:dealer_hand][0][0].downcase.to_sym]}.jpg" class="img-polaroid">] %>
+  <%= %Q[<img src="/images/cards/cover.jpg" class="img-polaroid">] %>
 <% end %>
-
+</div>
 <% if @dealer_turn && !@game_over %>
   <form action="/game/dealer/hit" method="post">
     <input type="submit" class="btn" value="Dealer's Next Card">
   </form>
 <% end %>
 
-<% if !@bust_or_stay && !busted?(session[:player_hand]) && !@dealer_turn %>
+<% if !@bust_or_stay && !busted?(session[:player_hand]) && !blackjack?(session[:player_hand]) && !@dealer_turn %>
   <form action="/game/dealer/turn" method="post">
     <input type="submit" class="btn" value="Click to Start Dealer Turn">
   </form>
@@ -34,15 +34,16 @@ Dealer's Hand:
 
 
 <br/>
+<div class="well">
+<h4>Player's Hand:</h4>
 
-Player's Hand:
-
+<%= show_hand(session[:player_hand]) %>
 <% session[:player_hand].each do |card| %>
-  <%= %Q[<img src="/images/cards/#{card[1].downcase}_#{CARD_VALUES[card[0].downcase.to_sym]}.jpg">] %>
+  <%= %Q[<img src="/images/cards/#{card[1].downcase}_#{CARD_VALUES[card[0].downcase.to_sym]}.jpg" class="img-polaroid">] %>
 <% end %>
 
 <p><%= session[:player_name] %>'s cards total: <%= total(session[:player_hand]).join(" or ") %></p>
-
+</div>
 <% if @bust_or_stay %>
   <form action="/game/player/hit" method="post">
     <input type="submit" class="btn" value="Hit">
