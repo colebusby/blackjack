@@ -1,0 +1,7 @@
+<h3>How much would you like to bet?</h3>
+<h4>Your current balance is: $<%= session[:player_balance] %></h4>
+<form action="/player_bet" method="post">
+  <input type="text" name="player_bet" />
+  <br/>
+  <input type="submit" class="btn btn-info btn-large" value="Place Bet"/>
+</form>

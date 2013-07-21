@@ -28,9 +28,11 @@ helpers do
   end
 
   def show_hand(dealer_or_player_hand)
+    arr = []
     dealer_or_player_hand.each do |card|
-      %Q(<img src="/images/cards/#{card[1].downcase}_#{CARD_VALUES[card[0].downcase.to_sym]}.jpg">)
+      arr << %Q(<img src="/images/cards/#{card[1].downcase}_#{CARD_VALUES[card[0].downcase.to_sym]}.jpg" class="img-polaroid">)
     end
+    arr.join("  ")
   end
 
   def busted?(dealer_or_player_hand)
@@ -55,17 +57,13 @@ helpers do
 
   def determine_winner
     if final_total(session[:player_hand]) > final_total(session[:dealer_hand])
-      #player wins
-      @success = "#{session[:player_name]} wins! #{session[:player_name]}'s total is: #{final_total(session[:player_hand])}  Dealer's total is: #{final_total(session[:dealer_hand])}"
-      #would you like to play again
+      session[:player_balance] += session[:player_bet]
+      @success = "#{session[:player_name]} wins! #{session[:player_name]}'s total is: #{final_total(session[:player_hand])}  Dealer's total is: #{final_total(session[:dealer_hand])} #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
     elsif final_total(session[:player_hand]) == final_total(session[:dealer_hand])
-      #player ties
-      @error = "#{session[:player_name]} pushes. #{session[:player_name]}'s total is: #{final_total(session[:player_hand])}  Dealer's total is: #{final_total(session[:dealer_hand])}"
-      #would you like to play again
+      @error = "#{session[:player_name]} pushes. #{session[:player_name]}'s total is: #{final_total(session[:player_hand])}  Dealer's total is: #{final_total(session[:dealer_hand])} #{session[:player_name]}'s balance remains at: $#{session[:player_balance]}"
     elsif final_total(session[:player_hand]) < final_total(session[:dealer_hand])
-      #player loses
-      @error = "#{session[:player_name]} loses! #{session[:player_name]}'s total is: #{final_total(session[:player_hand])}  Dealer's total is: #{final_total(session[:dealer_hand])}"
-      #would you like to play again
+      session[:player_balance] -= session[:player_bet]
+      @error = "#{session[:player_name]} loses! #{session[:player_name]}'s total is: #{final_total(session[:player_hand])}  Dealer's total is: #{final_total(session[:dealer_hand])} #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
     end
   end
 
@@ -90,8 +88,29 @@ get '/new_player' do
 end
 
 post '/new_player' do
+  if params[:player_name].empty?
+    @error = "Name is required!"
+    halt erb :new_player
+  end
   session[:player_name] = params[:player_name]
-  redirect '/game'
+  session[:player_balance] = 500
+  redirect '/player_bet'
+end
+
+get '/player_bet' do
+  erb :player_bet
+end
+
+post '/player_bet' do
+  if params[:player_bet].empty? || params[:player_bet].to_i == 0
+    @error = "You must make a bet!"
+    halt erb :player_bet
+  elsif session[:player_balance] < params[:player_bet].to_i
+    @error = "The house does not play on credit! Do not try to bet more than you have!"
+    halt erb :player_bet
+  end
+  session[:player_bet] = params[:player_bet].to_i
+  redirect '/game'      
 end
 
 get '/game' do
@@ -105,23 +124,23 @@ get '/game' do
     session[:dealer_hand] << session[:deck].pop
     session[:player_hand] << session[:deck].pop
   end
-  #session[:dealer_hand] = [["Ace", "Spades"], ["Five", "Clubs"]]
+  #session[:dealer_hand] << ["Ten", "Clubs"]
+  #session[:dealer_hand] << ["Seven", "Clubs"]
+  #session[:player_hand] << ["Ten", "Diamonds"]
+  #session[:player_hand] << ["Ten", "Spades"]
 
   #Special conditions after initial deal
   if blackjack?(session[:player_hand]) && blackjack?(session[:dealer_hand])
-    @error = "Both you and the dealer were dealt a blackjack. The hand ends in a push."
+    @error = "Both #{session[:player_name]} and the dealer were dealt a blackjack. The hand ends in a push. #{session[:player_name]}'s balance remains at: $#{session[:player_balance]}"
     @bust_or_stay = false
     @game_over = true
-    #push
-    #would you like to play again?
   elsif blackjack?(session[:player_hand])
-    @success = "You hit blackjack!"
+    session[:player_balance] += (session[:player_bet] * 1.5).to_i
+    @success = "#{session[:player_name]} hit blackjack! #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
     @bust_or_stay = false
     @game_over = true
-    #player wins
-    #would you like to play again?
   elsif blackjack?(session[:dealer_hand])
-    @error = "Oh no, the dealer was dealt a blackjack! The best you can hope for is a push this hand."
+    @error = "Oh no, the dealer was dealt a blackjack! The best #{session[:player_name]} can hope for is a push this hand."
   end
 
   erb :game
@@ -130,17 +149,15 @@ end
 post '/game/player/hit' do
   session[:player_hand] << session[:deck].pop
   if busted?(session[:player_hand])
-    @error = "Sorry, you busted. Better luck next time!"
+    session[:player_balance] -= session[:player_bet]
+    @error = "Sorry, #{session[:player_name]} busted. Better luck next time! #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
     @bust_or_stay = false
     @game_over = true
-    #player loses
-    #would you like to play again?
   elsif blackjack?(session[:player_hand])
-    @success = "You hit blackjack!"
+    session[:player_balance] += session[:player_bet]
+    @success = "#{session[:player_name]} hit blackjack! #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
     @bust_or_stay = false
-    @game_over = true
-    #player wins
-    #would you like to play again      
+    @game_over = true      
   end
   erb :game
 end
@@ -157,7 +174,6 @@ post '/game/dealer/turn' do
   if blackjack?(session[:dealer_hand]) || dealer_17?
     @game_over = true
     determine_winner
-    #would you like to play again
   end
 
   erb :game
@@ -168,20 +184,18 @@ post '/game/dealer/hit' do
   @dealer_turn = true
   session[:dealer_hand] << session[:deck].pop
   if busted?(session[:dealer_hand])
-    @success = "The dealer busted. You win!"
+    session[:player_balance] += session[:player_bet]
+    @success = "The dealer busted. #{session[:player_name]} wins! #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
     @game_over = true
-    #Player wins
-    #would you like to play again
   elsif blackjack?(session[:dealer_hand]) || dealer_17?
     @game_over = true
     determine_winner
-    #would you like to play again
   end
   erb :game
 end
 
 get '/game/new_round' do
-  redirect '/new_player'
+  redirect '/player_bet'
 
   erb :game
 end

@@ -1,6 +1,6 @@
 <% if @game_over %>  
   <form action="/game/new_round">
-    <input type="submit" class="btn-large" value="Play another round?">
+    <input type="submit" class="btn btn-success btn-large" value="Play another round?">
   </form>
 <% end %>
 
@@ -11,9 +11,7 @@
 <h4>Dealer's Hand:</h4>
 
 <% if @dealer_turn || blackjack?(session[:dealer_hand]) %>
-  <% session[:dealer_hand].each do |card| %>
-    <%= %Q[<img src="/images/cards/#{card[1].downcase}_#{CARD_VALUES[card[0].downcase.to_sym]}.jpg" class="img-polaroid">] %>
-  <% end %>
+  <%= show_hand(session[:dealer_hand]) %>
   <p>Dealer's cards total: <%= total(session[:dealer_hand]).join(" or ") %></p>
 <% else %>
   <%= %Q[<img src="/images/cards/#{session[:dealer_hand][0][1].downcase}_#{CARD_VALUES[session[:dealer_hand][0][0].downcase.to_sym]}.jpg" class="img-polaroid">] %>
@@ -38,18 +36,17 @@
 <h4>Player's Hand:</h4>
 
 <%= show_hand(session[:player_hand]) %>
-<% session[:player_hand].each do |card| %>
-  <%= %Q[<img src="/images/cards/#{card[1].downcase}_#{CARD_VALUES[card[0].downcase.to_sym]}.jpg" class="img-polaroid">] %>
-<% end %>
 
 <p><%= session[:player_name] %>'s cards total: <%= total(session[:player_hand]).join(" or ") %></p>
 </div>
 <% if @bust_or_stay %>
-  <form action="/game/player/hit" method="post">
-    <input type="submit" class="btn" value="Hit">
+  <div class="btn-group">
+  <form action="/game/player/hit" method="post" class="btn btn-small">
+    <button type="submit" class="btn btn-warning btn-large">Hit</button>
   </form>
 
-  <form action="/game/player/stay" method="post">
-    <input type="submit" class="btn" value="Stay">
+  <form action="/game/player/stay" method="post" class="btn btn-small">
+    <button type="submit" class="btn btn-info btn-large">Stay</button>
   </form>
+  </div>
 <% end %>
