@@ -127,10 +127,6 @@ get '/game' do
     session[:dealer_hand] << session[:deck].pop
     session[:player_hand] << session[:deck].pop
   end
-  #session[:dealer_hand] << ["Ten", "Clubs"]
-  #session[:dealer_hand] << ["Seven", "Clubs"]
-  #session[:player_hand] << ["Ten", "Diamonds"]
-  #session[:player_hand] << ["Ten", "Spades"]
 
   #Special conditions after initial deal
   if blackjack?(session[:player_hand]) && blackjack?(session[:dealer_hand])
