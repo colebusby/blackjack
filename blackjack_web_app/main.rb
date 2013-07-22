@@ -98,6 +98,9 @@ post '/new_player' do
 end
 
 get '/player_bet' do
+  if session[:player_balance] == 0
+    redirect '/game_over'
+  end
   erb :player_bet
 end
 
@@ -196,6 +199,13 @@ end
 
 get '/game/new_round' do
   redirect '/player_bet'
+end
 
-  erb :game
+get '/game_over' do
+  @error = "You ran out of money!"
+  erb :game_over
+end
+
+get '/game/new_game' do
+  redirect '/new_player'
 end
