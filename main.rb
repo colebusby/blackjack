@@ -157,7 +157,7 @@ post '/game/player/hit' do
     @bust_or_stay = false
     @game_over = true      
   end
-  erb :game
+  erb :game, layout: false
 end
 
 post '/game/player/stay' do
