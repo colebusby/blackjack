@@ -21,13 +21,13 @@
 
 <% if @dealer_turn && !@game_over %>
   <form action="/game/dealer/hit" method="post">
-    <input type="submit" class="btn" value="Dealer's Next Card">
+    <input type="submit" class="btn btn-large btn-info" value="Dealer's Next Card">
   </form>
 <% end %>
 
 <% if !@bust_or_stay && !busted?(session[:player_hand]) && !blackjack?(session[:player_hand]) && !@dealer_turn %>
   <form action="/game/dealer/turn" method="post">
-    <input type="submit" class="btn" value="Click to Start Dealer Turn">
+    <input type="submit" class="btn btn-large btn-info" value="Click to Start Dealer Turn">
   </form>
 <% end %>
 
@@ -42,11 +42,11 @@
   </div>
   <% if @bust_or_stay %>
     <div class="btn-group">
-    <form action="/game/player/hit" method="post" class="btn btn-small">
+    <form action="/game/player/hit" method="post" class="btn btn-small btn-link">
       <button type="submit" class="btn btn-warning btn-large">Hit</button>
     </form>
 
-    <form action="/game/player/stay" method="post" class="btn btn-small">
+    <form action="/game/player/stay" method="post" class="btn btn-small btn-link">
       <button type="submit" class="btn btn-info btn-large">Stay</button>
     </form>
   </div>
