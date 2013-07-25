@@ -1,4 +1,12 @@
 <div id="game">
+
+  <%if @loser %>
+    <div class="alert alert-error"><%=@loser%></div>
+  <% end %>
+  <%if @winner %>
+    <div class="alert alert-success"><%=@winner%></div>
+  <% end %>
+
   <% if @game_over %>  
     <form action="/game/new_round">
       <input type="submit" class="btn btn-success btn-large" value="Play another round?">
@@ -21,9 +29,7 @@
   </div>
 
   <% if @dealer_turn && !@game_over %>
-    <form action="/game/dealer/hit" method="post">
-      <input type="submit" class="btn btn-large btn-info" value="Dealer's Next Card">
-    </form>
+    <button id="dealer_hit_button" type="submit" class="btn btn-info btn-large">Dealer's Next Card</button>
   <% end %>
 
   <% if !@bust_or_stay && !busted?(session[:player_hand]) && !blackjack?(session[:player_hand]) && !@dealer_turn %>
@@ -40,16 +46,12 @@
     <%= show_hand(session[:player_hand]) %>
 
     <p><%= session[:player_name] %>'s cards total: <%= total(session[:player_hand]).join(" or ") %></p>
-    </div>
-    <% if @bust_or_stay %>
-      <div class="btn-group">
-      <!--<form id="hit_form" action="/game/player/hit" method="post" class="btn btn-small btn-link">-->
-        <button id="hit_button" type="submit" class="btn btn-warning btn-large">Hit</button>
-      <!--</form>-->
+  </div>
 
-      <!--<form action="/game/player/stay" method="post" class="btn btn-small btn-link">-->
-        <button id="stay_button" type="submit" class="btn btn-info btn-large">Stay</button>
-      <!--</form>-->
+  <% if @bust_or_stay %>
+    <div class="btn-group">
+      <button id="hit_button" type="submit" class="btn btn-warning btn-large">Hit</button>
+      <button id="stay_button" type="submit" class="btn btn-info btn-large">Stay</button>
     </div>
   <% end %>
 </div>
