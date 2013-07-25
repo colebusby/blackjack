@@ -25,7 +25,7 @@ helpers do
     end
     value.uniq
   end
-k,k.ll.,,
+
   def show_hand(dealer_or_player_hand)
     arr = []
     dealer_or_player_hand.each do |card|
