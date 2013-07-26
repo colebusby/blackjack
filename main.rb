@@ -55,14 +55,48 @@ helpers do
   end
 
   def determine_winner
-    if final_total(session[:player_hand]) > final_total(session[:dealer_hand])
-      session[:player_balance] += session[:player_bet]
-      @winner = "#{session[:player_name]} wins! #{session[:player_name]}'s total is: #{final_total(session[:player_hand])}  Dealer's total is: #{final_total(session[:dealer_hand])} #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
-    elsif final_total(session[:player_hand]) == final_total(session[:dealer_hand])
-      @loser = "#{session[:player_name]} pushes. #{session[:player_name]}'s total is: #{final_total(session[:player_hand])}  Dealer's total is: #{final_total(session[:dealer_hand])} #{session[:player_name]}'s balance remains at: $#{session[:player_balance]}"
-    elsif final_total(session[:player_hand]) < final_total(session[:dealer_hand])
-      session[:player_balance] -= session[:player_bet]
-      @loser = "#{session[:player_name]} loses! #{session[:player_name]}'s total is: #{final_total(session[:player_hand])}  Dealer's total is: #{final_total(session[:dealer_hand])} #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
+    if session[:split_bet] > 0
+      if !busted?(session[:player_hand]) && final_total(session[:player_hand]) > final_total(session[:dealer_hand]) && final_total(session[:player_split]) > final_total(session[:dealer_hand])
+        session[:player_balance] += session[:player_bet_total]
+        @winner = "#{session[:player_name]} wins! #{session[:player_name]}'s split earned: $#{session[:split_bet]}    #{session[:player_name]}'s other hand earned: $#{session[:player_bet]}    #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
+      elsif !busted?(session[:player_hand]) && final_total(session[:player_hand]) < final_total(session[:dealer_hand]) && final_total(session[:player_split]) > final_total(session[:dealer_hand])
+        session[:player_balance] += session[:split_bet]
+        session[:player_balance] -= session[:player_bet]
+        @loser = "#{session[:player_name]}'s split earned: $#{session[:split_bet]}    #{session[:player_name]}'s other hand lost: $#{session[:player_bet]}    #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
+      elsif !busted?(session[:player_hand]) && final_total(session[:player_hand]) > final_total(session[:dealer_hand]) && final_total(session[:player_split]) < final_total(session[:dealer_hand])
+        session[:player_balance] += session[:player_bet]
+        session[:player_balance] -= session[:split_bet]
+        @loser = "#{session[:player_name]}'s split lost: $#{session[:split_bet]}    #{session[:player_name]}'s other hand earned: $#{session[:player_bet]}    #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
+      elsif !busted?(session[:player_hand]) && final_total(session[:player_hand]) == final_total(session[:dealer_hand]) && final_total(session[:player_split]) > final_total(session[:dealer_hand])
+        session[:player_balance] += session[:split_bet]
+        @winner = "#{session[:player_name]} wins! #{session[:player_name]}'s split earned: $#{session[:split_bet]}    #{session[:player_name]}'s other hand pushed.    #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
+      elsif !busted?(session[:player_hand]) && final_total(session[:player_hand]) > final_total(session[:dealer_hand]) && final_total(session[:player_split]) == final_total(session[:dealer_hand])
+        session[:player_balance] += session[:player_bet]
+        @winner = "#{session[:player_name]} wins! #{session[:player_name]}'s split pushed.    #{session[:player_name]}'s other hand earned: $#{session[:player_bet]}    #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
+      elsif !busted?(session[:player_hand]) && final_total(session[:player_hand]) < final_total(session[:dealer_hand]) && final_total(session[:player_split]) < final_total(session[:dealer_hand])
+        session[:player_balance] -= session[:player_bet_total]
+        @loser = "#{session[:player_name]} loses! #{session[:player_name]}'s split lost: $#{session[:split_bet]}    #{session[:player_name]}'s other hand lost: $#{session[:player_bet]}    #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
+      elsif busted?(session[:player_hand]) && final_total(session[:player_split]) > final_total(session[:dealer_hand])
+        session[:player_balance] += session[:split_bet]
+        session[:player_balance] -= session[:player_bet]
+        @loser = "#{session[:player_name]}'s split earned: $#{session[:split_bet]}    #{session[:player_name]}'s other hand lost: $#{session[:player_bet]}    #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
+      elsif busted?(session[:player_hand]) && final_total(session[:player_split]) < final_total(session[:dealer_hand])
+        session[:player_balance] -= session[:player_bet_total]
+        @loser = "#{session[:player_name]} loses! #{session[:player_name]}'s split lost: $#{session[:split_bet]}    #{session[:player_name]}'s other hand lost: $#{session[:player_bet]}    #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
+      elsif busted?(session[:player_hand]) && final_total(session[:player_split]) == final_total(session[:dealer_hand])
+        session[:player_balance] -= session[:player_bet]
+        @loser = "#{session[:player_name]}'s split pushed.    #{session[:player_name]}'s other hand lost: $#{session[:player_bet]}    #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
+      end
+    else
+      if final_total(session[:player_hand]) > final_total(session[:dealer_hand])
+        session[:player_balance] += session[:player_bet]
+        @winner = "#{session[:player_name]} wins! #{session[:player_name]}'s total is: #{final_total(session[:player_hand])}  Dealer's total is: #{final_total(session[:dealer_hand])} #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
+      elsif final_total(session[:player_hand]) == final_total(session[:dealer_hand])
+        @loser = "#{session[:player_name]} pushes. #{session[:player_name]}'s total is: #{final_total(session[:player_hand])}  Dealer's total is: #{final_total(session[:dealer_hand])} #{session[:player_name]}'s balance remains at: $#{session[:player_balance]}"
+      elsif final_total(session[:player_hand]) < final_total(session[:dealer_hand])
+        session[:player_balance] -= session[:player_bet]
+        @loser = "#{session[:player_name]} loses! #{session[:player_name]}'s total is: #{final_total(session[:player_hand])}  Dealer's total is: #{final_total(session[:dealer_hand])} #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
+      end
     end
   end
 
@@ -72,6 +106,8 @@ before do
   @bust_or_stay = true
   @dealer_turn = false
   @game_over = false
+  @split = false
+  @split_turn = false
 end
 
 get '/' do
@@ -104,7 +140,7 @@ get '/player_bet' do
 end
 
 post '/player_bet' do
-  if params[:player_bet].empty? || params[:player_bet].to_i == 0
+  if params[:player_bet].empty? || params[:player_bet].to_i <= 0
     @error = "You must make a bet!"
     halt erb :player_bet
   elsif session[:player_balance] < params[:player_bet].to_i
@@ -112,7 +148,9 @@ post '/player_bet' do
     halt erb :player_bet
   end
   session[:player_bet] = params[:player_bet].to_i
-  redirect '/game'      
+  session[:split_bet] = 0
+  session[:player_bet_total] = session[:player_bet] + session[:split_bet]
+  redirect '/game'
 end
 
 get '/game' do
@@ -122,6 +160,7 @@ get '/game' do
   session[:deck] = values.product(suits).shuffle!
   session[:dealer_hand] = []
   session[:player_hand] = []
+  session[:player_split] = []
   2.times do
     session[:dealer_hand] << session[:deck].pop
     session[:player_hand] << session[:deck].pop
@@ -147,23 +186,110 @@ end
 post '/game/player/hit' do
   session[:player_hand] << session[:deck].pop
   if busted?(session[:player_hand])
-    session[:player_balance] -= session[:player_bet]
-    @loser = "Sorry, #{session[:player_name]} busted. Better luck next time! #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
+    if session[:split_bet] > 0
+      @loser = "#{session[:player_name]} busted."
+    else
+      session[:player_balance] -= session[:player_bet_total]
+      @loser = "#{session[:player_name]} busts! Better luck next time. #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
+      @game_over = true
+    end
     @bust_or_stay = false
-    @game_over = true
   elsif blackjack?(session[:player_hand])
-    session[:player_balance] += session[:player_bet]
-    @winner = "#{session[:player_name]} hit blackjack! #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
-    @bust_or_stay = false
-    @game_over = true      
+    @winner = "#{session[:player_name]} hit blackjack!"
+    @bust_or_stay = false    
   end
   erb :game, layout: false
 end
 
+post '/game/split/hit' do
+  @bust_or_stay = false
+  @split = true
+  @split_turn = true
+  session[:player_split] << session[:deck].pop
+  if busted?(session[:player_split])
+    session[:player_balance] -= session[:split_bet]
+    session[:player_bet_total] -= session[:split_bet]
+    session[:split_bet] = 0
+    @loser = "Sorry, #{session[:player_name]} busted. Better luck next time! #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
+    @split_turn = false
+    @bust_or_stay = true
+  elsif blackjack?(session[:player_split])
+    @winner = "#{session[:player_name]} hit blackjack!"
+    @split_turn = false
+    @bust_or_stay = true
+  end
+  erb :game, layout: false
+end
+
+post '/game/player/double_down' do
+  session[:player_hand] << session[:deck].pop
+  session[:player_bet_total] += session[:player_bet]
+  session[:player_bet] *= 2
+  @bust_or_stay = false
+  if busted?(session[:player_hand])
+    if session[:split_bet] > 0
+      @loser = "#{session[:player_name]} busted."
+    else
+      session[:player_balance] -= session[:player_bet_total]
+      @loser = "#{session[:player_name]} busts! Better luck next time. #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
+      @game_over = true
+    end
+    @bust_or_stay = false
+  elsif blackjack?(session[:player_hand])
+    @winner = "#{session[:player_name]} hit blackjack! #{session[:player_name]}'s new bet is: $#{session[:player_bet]}"
+    @bust_or_stay = false
+  else
+    @winner = "#{session[:player_name]} doubled down. #{session[:player_name]}'s new bet is: $#{session[:player_bet]}"
+    @bust_or_stay = false
+  end
+  erb :game, layout: false
+end
+
+post '/game/split/double_down' do
+  @split = true
+  @split_turn = true
+  session[:player_split] << session[:deck].pop
+  session[:split_bet] *= 2
+  session[:player_bet_total] = session[player_bet] + session[:split_bet]
+  if busted?(session[:split_hand])
+    session[:player_balance] -= session[:split_bet]
+    session[:player_bet_total] -= session[:split_bet]
+    session[:split_bet] = 0
+    @loser = "Sorry, #{session[:player_name]} busted. Better luck next time! #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
+    @split_turn = false
+  elsif blackjack?(session[:player_hand])
+    @winner = "#{session[:player_name]} hit blackjack!"
+    @split_turn = false
+  else
+    @winner = "#{session[:player_name]} doubled down. #{session[:player_name]}'s new bet is: $#{session[:split_bet]}"
+    @split_turn = false
+  end
+  erb :game, layout: false
+end
+
+post '/game/player/split' do
+  @split = true
+  @split_turn = true
+  session[:split_bet] = session[:player_bet]
+  session[:player_split] << session[:player_hand].pop
+  session[:player_split] << session[:deck].pop
+  session[:player_hand] << session[:deck].pop
+  erb :game, layout: false
+end
+
 post '/game/player/stay' do
-  @winner = "You chose to stay."
+  @winner = "#{session[:player_name]} chose to stay."
   @bust_or_stay = false
   erb :game, layout: false
+end
+
+post '/game/split/stay' do
+  @winner = "#{session[:player_name]} chose to stay the split."
+  erb :game, layout: false
+end
+
+post '/game/split/end' do
+  erb :game
 end
 
 post '/game/dealer/turn' do

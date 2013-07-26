@@ -32,6 +32,8 @@
     <button id="dealer_hit_button" type="submit" class="btn btn-info btn-large">Dealer's Next Card</button>
   <% end %>
 
+  <br/>
+
   <% if !@bust_or_stay && !busted?(session[:player_hand]) && !blackjack?(session[:player_hand]) && !@dealer_turn %>
     <form action="/game/dealer/turn" method="post">
       <input type="submit" class="btn btn-large btn-info" value="Click to Start Dealer Turn">
@@ -40,18 +42,61 @@
 
   <br/>
 
-  <div class="well">
-    <h4>Player's Hand:</h4>
+  <% if @split %>
+    <div class="well">
+      <h4>Player's Split:</h4>
 
-    <%= show_hand(session[:player_hand]) %>
+      <%= show_hand(session[:player_split]) %>
 
-    <p><%= session[:player_name] %>'s cards total: <%= total(session[:player_hand]).join(" or ") %></p>
-  </div>
-
-  <% if @bust_or_stay %>
-    <div class="btn-group">
-      <button id="hit_button" type="submit" class="btn btn-warning btn-large">Hit</button>
-      <button id="stay_button" type="submit" class="btn btn-info btn-large">Stay</button>
+      <p><%= session[:player_name] %>'s cards total: <%= total(session[:player_split]).join(" or ") %></p>
     </div>
+
+    <% if @split_turn %>
+      <div class="btn-group">
+        <button id="split_hit_button" type="submit" class="btn btn-warning btn-large">Hit</button>
+        <% if (session[:player_balance]-session[:player_bet_total]) >= session[:player_bet] %>
+          <button id="split_double_down_button" type="submit" class="btn btn-danger btn-large">Double Down</button>
+        <% else %>
+          <button type="submit" class="btn btn-danger btn-large disabled">Double Down</button>
+        <% end %>
+        <button id="split_stay_button" type="submit" class="btn btn-info btn-large">Stay</button>
+      </div>
+    <% end %>
+
+    <% if @split && !@split_turn %>
+      <form action="/game/split/end" method="post">
+        <input type="submit" class="btn btn-large btn-info" value="Click to Start Other Hand">
+      </form>
+    <% end %>
+
+    <br/>
   <% end %>
+
+  <% if !@split %>
+    <div class="well">
+      <h4>Player's Hand:</h4>
+
+      <%= show_hand(session[:player_hand]) %>
+
+      <p><%= session[:player_name] %>'s cards total: <%= total(session[:player_hand]).join(" or ") %></p>
+    </div>
+
+    <% if @bust_or_stay %>
+      <div class="btn-group">
+        <button id="hit_button" type="submit" class="btn btn-warning btn-large">Hit</button>
+        <% if (session[:player_balance]-session[:player_bet_total]) >= session[:player_bet] %>
+          <button id="double_down_button" type="submit" class="btn btn-danger btn-large">Double Down</button>
+        <% else %>
+          <button type="submit" class="btn btn-danger btn-large disabled">Double Down</button>
+        <% end %>
+        <% if session[:player_hand].size == 2 && session[:player_hand][0][0] == session[:player_hand][1][0] && session[:player_balance]/session[:player_bet].to_f >= 2 && session[:player_split] == [] %>
+          <button id="split_button" type="submit" class="btn btn-success btn-large">Split</button>
+        <% else %>
+          <button type="submit" class="btn btn-success btn-large disabled">Split</button>
+        <% end %>
+        <button id="stay_button" type="submit" class="btn btn-info btn-large">Stay</button>
+      </div>
+    <% end %>
+  <% end %>
+<br/>  
 </div>
