@@ -188,8 +188,9 @@ post '/game/player/hit' do
   if busted?(session[:player_hand])
     if session[:split_bet] > 0
       @loser = "#{session[:player_name]} busted."
+      @bust_or_stay = false
     else
-      session[:player_balance] -= session[:player_bet_total]
+      session[:player_balance] -= session[:player_bet]
       @loser = "#{session[:player_name]} busts! Better luck next time. #{session[:player_name]}'s new balance is: $#{session[:player_balance]}"
       @game_over = true
     end
@@ -237,10 +238,8 @@ post '/game/player/double_down' do
     @bust_or_stay = false
   elsif blackjack?(session[:player_hand])
     @winner = "#{session[:player_name]} hit blackjack! #{session[:player_name]}'s new bet is: $#{session[:player_bet]}"
-    @bust_or_stay = false
   else
     @winner = "#{session[:player_name]} doubled down. #{session[:player_name]}'s new bet is: $#{session[:player_bet]}"
-    @bust_or_stay = false
   end
   erb :game, layout: false
 end

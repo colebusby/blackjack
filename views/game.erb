@@ -34,7 +34,7 @@
 
   <br/>
 
-  <% if !@bust_or_stay && !busted?(session[:player_hand]) && !blackjack?(session[:player_hand]) && !@dealer_turn %>
+  <% if !@bust_or_stay && !@game_over && !@dealer_turn %>
     <form action="/game/dealer/turn" method="post">
       <input type="submit" class="btn btn-large btn-info" value="Click to Start Dealer Turn">
     </form>
