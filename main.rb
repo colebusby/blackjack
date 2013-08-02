@@ -99,7 +99,6 @@ helpers do
       end
     end
   end
-
 end
 
 before do
